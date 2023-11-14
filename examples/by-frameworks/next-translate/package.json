@@ -8,10 +8,10 @@
     "i18n": "node ../../cli/builder.js"
   },
   "dependencies": {
-    "next": "10.2.3",
+    "next": "13.4.5",
     "next-translate": "link:../../",
-    "react": "link:../../node_modules/react",
-    "react-dom": "link:../../node_modules/react-dom"
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
   },
   "devDependencies": {
     "@types/node": "15.6.1",
