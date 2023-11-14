@@ -208,9 +208,12 @@ function ExtractIngore(text: string, document?: TextDocument) {
   if (document) {
     const path = relative(Config.root, document.uri.fsPath)
     const obj = Config.extractIgnoredByFiles
-    if (!obj[path])
-      obj[path] = []
-    obj[path].push(text)
+    obj[path] ??= []
+
+    const strings = obj[path]
+    strings.push(text)
+
+    obj[path] = strings
     Config.extractIgnoredByFiles = obj
   }
   else {
