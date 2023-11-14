@@ -27,7 +27,7 @@ class NextIntlFramework extends Framework {
   ]
 
   usageMatchRegex = [
-    // Basic usage
+    // Basic usage - [^\\w\\d]t\\([\'"`]({key})[\'"`]
     '[^\\w\\d]t\\s*\\(\\s*[\'"`]({key})[\'"`]',
 
     // Rich text

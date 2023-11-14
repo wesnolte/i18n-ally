@@ -1,6 +1,8 @@
 import { TextDocument } from 'vscode'
 import { Framework, ScopeRange } from './base'
 import { LanguageId } from '~/utils'
+import { Config } from '~/core'
+import { extractionsParsers, DefaultExtractionRules, DefaultDynamicExtractionsRules } from '~/extraction'
 
 class NextTranslateFramework extends Framework {
   id= 'next-translate'
@@ -22,21 +24,51 @@ class NextTranslateFramework extends Framework {
 
   // for visualize the regex, you can use https://regexper.com/
   usageMatchRegex = [
-    '[^\\w\\d]t\\([\'"`]({key})[\'"`]',
+    '[^\\w\\d]t\\s*\\(\\s*[\'"`]({key})[\'"`]',
     '[^\\w\\d]t`({key})`',
     'Trans\\s+i18nKey=[\'"`]({key})[\'"`]',
   ]
 
-  refactorTemplates(keypath: string) {
-    return [
-      `{t('${keypath}')}`,
-      `t('${keypath}')`,
-      keypath,
-    ]
+  detectHardStrings(doc: TextDocument) {
+    const lang = doc.languageId
+    const text = doc.getText()
+
+    if (lang === 'html') {
+      return extractionsParsers.html.detect(
+        text,
+        DefaultExtractionRules,
+        DefaultDynamicExtractionsRules,
+        Config.extractParserHTMLOptions,
+        // <script>
+        script => extractionsParsers.babel.detect(
+          script,
+          DefaultExtractionRules,
+          DefaultDynamicExtractionsRules,
+          Config.extractParserBabelOptions,
+        ),
+      )
+    }
+    else {
+      return extractionsParsers.babel.detect(
+        text,
+        DefaultExtractionRules,
+        DefaultDynamicExtractionsRules,
+        {},
+        (path, recordIgnore) => {
+          const callee = path.get('callee')
+          if (callee.node.name === 't' || callee.node.name === 'Trans')
+            recordIgnore(path)
+        },
+      )
+    }
   }
 
-  rewriteKeys(key: string) {
-    return key.replace(/:/g, '.')
+  refactorTemplates(keypath: string) {
+    const pathWithoutNamespace = keypath.substring(keypath.indexOf('.') + 1, keypath.length)
+    return [
+      `{t('${pathWithoutNamespace}')}`,
+      `t('${pathWithoutNamespace}')`,
+    ]
   }
 
   // useTranslation
