@@ -83,7 +83,7 @@ class NextTranslateFramework extends Framework {
 
     const ranges: ScopeRange[] = []
     const text = document.getText()
-    const reg = /useTranslation\((?:['"`](.*)['"`]|)\)/g
+    const reg = /(?:useTranslation\(\s*|getT\(.*,\s*)(?:['"`](.*?)['"`])?/g
 
     for (const match of text.matchAll(reg)) {
       if (match?.index == null)
